@@ -71,7 +71,7 @@ public class App {
         MainFrame mainFrame = new MainFrame();
         mainFrame.setVisible(true);
         mainFrame.setBounds(0, 0, 200, 500);
-        
+
         this.image1 = image1;
         panel1.add(new JLabel(new ImageIcon(image1)));
         frame1.revalidate();
@@ -171,7 +171,7 @@ public class App {
     private byte quantizePixel(byte pixel, int quant) {
         int p = (int) pixel & 0xff;
         p = p / (256 / quant) * 256 / quant;
-        p += 256 / (2*quant);
+        p += 256 / (2 * quant);
         return (byte) p;
     }
 
@@ -188,11 +188,10 @@ public class App {
 
     public void histogram() {
         luminance();
-
         byte[] pixelArray = Util.getPixelArray(image2);
-        double[] data = new double[pixelArray.length/3];
-        for (int i = 0; i < pixelArray.length; i=i+3) {
-            data[i/3] = (double) (pixelArray[i] & 0xff);
+        double[] data = new double[pixelArray.length / 3];
+        for (int i = 0; i < pixelArray.length; i = i + 3) {
+            data[i / 3] = (double) (pixelArray[i] & 0xff);
         }
         HistogramDataset hd = new HistogramDataset();
         hd.setType(HistogramType.FREQUENCY);
@@ -202,6 +201,43 @@ public class App {
         ChartFrame cf = new ChartFrame("Frequency Histogram", chart);
         cf.pack();
         cf.setVisible(true);
+    }
+
+    public void brightness(String input) {
+        try {
+            int quant = Integer.parseInt(input);
+            luminance();
+            if (image2 == null) {
+                copyImage1();
+            }
+            int h = image2.getHeight();
+            int w = 3 * image2.getWidth();
+            byte[] pixelArray = Util.getPixelArray(image2);
+            for (int i = 0; i < h; i++) {
+                for (int j = 0; j < w / 3; j++) {
+                    pixelArray[i * w + 3 * j] = addBrightness(pixelArray[i * w + 3 * j], quant);
+                    pixelArray[i * w + 3 * j + 1] = addBrightness(pixelArray[i * w + 3 * j + 1], quant);
+                    pixelArray[i * w + 3 * j + 2] = addBrightness(pixelArray[i * w + 3 * j + 2], quant);
+                }
+            }
+            panel2.removeAll();
+            panel2.add(new JLabel(new ImageIcon(image2)));
+            frame2.revalidate();
+        } catch (NumberFormatException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private byte addBrightness(byte pixel, int quant) {
+        int p = (int) pixel & 0xff;
+        p += quant;
+        if (p > 255) {
+            p = 255;
+        }
+        if (p < 0) {
+            p = 0;
+        }
+        return (byte) p;
     }
 
 }
