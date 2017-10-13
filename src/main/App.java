@@ -285,4 +285,28 @@ public class App {
         return (byte) p;
     }
 
+    public void negative() {
+        if (image2 == null) {
+            copyImage1();
+        }
+        int h = image2.getHeight();
+        int w = 3 * image2.getWidth();
+        byte[] pixelArray = Util.getPixelArray(image2);
+        for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w / 3; j++) {
+                pixelArray[i * w + 3 * j] = negativePixel(pixelArray[i * w + 3 * j]);
+                pixelArray[i * w + 3 * j + 1] = negativePixel(pixelArray[i * w + 3 * j + 1]);
+                pixelArray[i * w + 3 * j + 2] = negativePixel(pixelArray[i * w + 3 * j + 2]);
+            }
+        }
+        panel2.removeAll();
+        panel2.add(new JLabel(new ImageIcon(image2)));
+        frame2.revalidate();
+    }
+
+    private byte negativePixel(byte pixel) {
+        int p = (int) pixel & 0xff;
+        return (byte) (255 - p);
+    }
+
 }
