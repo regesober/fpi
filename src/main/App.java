@@ -6,6 +6,7 @@
 package main;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +16,12 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartFrame;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.statistics.HistogramDataset;
+import org.jfree.data.statistics.HistogramType;
 
 /**
  *
@@ -32,7 +39,6 @@ public class App {
     private static App a = null;
 
     private App() {
-        
     }
 
     public static App getInstance() {
@@ -64,7 +70,7 @@ public class App {
 
         MainFrame mainFrame = new MainFrame();
         mainFrame.setVisible(true);
-        mainFrame.setBounds(0, 0, 200, 250);
+        mainFrame.setBounds(0, 0, 200, 500);
         
         this.image1 = image1;
         panel1.add(new JLabel(new ImageIcon(image1)));
@@ -177,6 +183,24 @@ public class App {
         } catch (IOException ex) {
             Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    public void histogram() {
+        luminance();
+
+        byte[] pixelArray = Util.getPixelArray(image2);
+        double[] data = new double[pixelArray.length/3];
+        for (int i = 0; i < pixelArray.length; i=i+3) {
+            data[i/3] = (double) (pixelArray[i] & 0xff);
+        }
+        HistogramDataset hd = new HistogramDataset();
+        hd.setType(HistogramType.FREQUENCY);
+        hd.addSeries("Frequencies", data, 256, 0, 255);
+        JFreeChart chart = ChartFactory.createHistogram("Histogram", "Pixel Value", "Frequency", hd, PlotOrientation.VERTICAL, false, false, false);
+        chart.setBackgroundPaint(Color.white);
+        ChartFrame cf = new ChartFrame("Frequency Histogram", chart);
+        cf.pack();
+        cf.setVisible(true);
     }
 
 }

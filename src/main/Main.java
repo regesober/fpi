@@ -20,15 +20,15 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        readAndWriteJpeg("Gramado_22k.jpg");
+        //readAndWriteJpeg("Gramado_22k.jpg");
         
-        /*try {
+        try {
             BufferedImage readJpeg = Util.readJpeg(args[0]);
             App app = App.getInstance();
             app.setImage1(readJpeg);
         } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
+        }
     }
 
     private static void readAndWriteJpeg(String filename) {
