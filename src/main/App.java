@@ -143,7 +143,7 @@ public class App {
     public void quantize(String input) {
         try {
             int quant = Integer.parseInt(input);
-
+            luminance();
             if (quant < 1 || quant > 256) {
                 return;
             }
@@ -171,6 +171,7 @@ public class App {
     private byte quantizePixel(byte pixel, int quant) {
         int p = (int) pixel & 0xff;
         p = p / (256 / quant) * 256 / quant;
+        p += 256 / (2*quant);
         return (byte) p;
     }
 
