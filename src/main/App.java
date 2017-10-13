@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartFrame;
@@ -143,10 +144,11 @@ public class App {
     public void quantize(String input) {
         try {
             int quant = Integer.parseInt(input);
-            luminance();
             if (quant < 1 || quant > 256) {
+                JOptionPane.showMessageDialog(null, "The number of tones must be an Integer in [1,256].", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            luminance();
             if (image2 == null) {
                 copyImage1();
             }
@@ -206,7 +208,10 @@ public class App {
     public void brightness(String input) {
         try {
             int quant = Integer.parseInt(input);
-            luminance();
+            if (quant < -255 || quant > 255) {
+                JOptionPane.showMessageDialog(null, "Brightness must be an Integer in [-255,255].", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             if (image2 == null) {
                 copyImage1();
             }
@@ -231,6 +236,46 @@ public class App {
     private byte addBrightness(byte pixel, int quant) {
         int p = (int) pixel & 0xff;
         p += quant;
+        if (p > 255) {
+            p = 255;
+        }
+        if (p < 0) {
+            p = 0;
+        }
+        return (byte) p;
+    }
+
+    public void contrast(String input) {
+        try {
+            double gain = Double.parseDouble(input);
+            if (gain < 0 || gain > 255) {
+                JOptionPane.showMessageDialog(null, "Contrast must be a Double in [-255,255].", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (image2 == null) {
+                copyImage1();
+            }
+            int h = image2.getHeight();
+            int w = 3 * image2.getWidth();
+            byte[] pixelArray = Util.getPixelArray(image2);
+            for (int i = 0; i < h; i++) {
+                for (int j = 0; j < w / 3; j++) {
+                    pixelArray[i * w + 3 * j] = changeContrast(pixelArray[i * w + 3 * j], gain);
+                    pixelArray[i * w + 3 * j + 1] = changeContrast(pixelArray[i * w + 3 * j + 1], gain);
+                    pixelArray[i * w + 3 * j + 2] = changeContrast(pixelArray[i * w + 3 * j + 2], gain);
+                }
+            }
+            panel2.removeAll();
+            panel2.add(new JLabel(new ImageIcon(image2)));
+            frame2.revalidate();
+        } catch (NumberFormatException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private byte changeContrast(byte pixel, double gain) {
+        int p = (int) pixel & 0xff;
+        p *= gain;
         if (p > 255) {
             p = 255;
         }
