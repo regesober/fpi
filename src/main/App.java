@@ -316,11 +316,8 @@ public class App {
         byte[] grayscale = grayscale(pixelArray, h, w);
         int[] grayscaleHistogram = grayscaleHistogram(grayscale);
         int[] cumulativeHistogram = cumulativeHistogram(grayscaleHistogram, pixelArray.length/3);
-        System.out.println(Arrays.toString(grayscaleHistogram));
         int sum = 0;
         for(int i = 0; i < grayscaleHistogram.length; i++) sum += grayscaleHistogram[i];
-        System.out.println(sum);
-        System.out.println(Arrays.toString(cumulativeHistogram));
         byte[] newImage = new byte[pixelArray.length];
         for (int i = 0; i < h * w; i++) {
             newImage[i] = (byte) cumulativeHistogram[toInt(pixelArray[i])];
@@ -364,9 +361,6 @@ public class App {
         double alpha = 255.0 / numberOfPixels;
         cumulativeHistogram[0] = (int) (alpha * histogram[0]);
         cumulativeDouble[0] = alpha * histogram[0];
-        System.out.println(histogram[0]);
-        System.out.println(cumulativeHistogram[0]);
-        System.out.println(alpha);
         for (int i = 1; i < 256; i++) {
             cumulativeDouble[i] = cumulativeDouble[i - 1] + (alpha * histogram[i]);
             cumulativeHistogram[i] = (int) cumulativeDouble[i];
