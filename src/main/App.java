@@ -5,6 +5,7 @@
  */
 package main;
 
+import util.ReadWriteUtil;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -24,6 +25,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.statistics.HistogramType;
+import util.Util;
 
 /**
  *
@@ -59,7 +61,7 @@ public class App {
         frame1 = new JFrame();
         frame1.add(panel1);
         frame1.setVisible(true);
-        frame1.setBounds(200, 0, image1.getWidth(), image1.getHeight());
+        frame1.setBounds(250, 0, image1.getWidth(), image1.getHeight());
         frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         panel2 = new JPanel(new BorderLayout());
@@ -67,12 +69,12 @@ public class App {
         frame2 = new JFrame();
         frame2.add(panel2);
         frame2.setVisible(true);
-        frame2.setBounds(200 + image1.getWidth(), 0, image1.getWidth(), image1.getHeight());
+        frame2.setBounds(250 + image1.getWidth(), 0, image1.getWidth(), image1.getHeight());
         frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         MainFrame mainFrame = new MainFrame();
         mainFrame.setVisible(true);
-        mainFrame.setBounds(0, 0, 200, 500);
+        mainFrame.setBounds(0, 0, 250, 500);
 
         this.image1 = image1;
         panel1.add(new JLabel(new ImageIcon(image1)));
@@ -80,7 +82,7 @@ public class App {
     }
 
     public void copyImage1() {
-        this.image2 = Util.copyImage(image1);
+        this.image2 = ReadWriteUtil.copyImage(image1);
         updateImage2();
     }
 
@@ -133,9 +135,9 @@ public class App {
         byte[] pixelArray = Util.getPixelArray(image2);
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w / 3; j++) {
-                int r = (int) pixelArray[i * w + 3 * j] & 0xff;
-                int g = (int) pixelArray[i * w + 3 * j + 1] & 0xff;
-                int b = (int) pixelArray[i * w + 3 * j + 2] & 0xff;
+                int r = Util.toInt(pixelArray[i * w + 3 * j]);
+                int g = Util.toInt(pixelArray[i * w + 3 * j + 1]);
+                int b = Util.toInt(pixelArray[i * w + 3 * j + 2]);
                 double l = (0.299 * r + 0.587 * g + 0.114 * b);
                 byte luminance = (byte) l;
                 pixelArray[i * w + 3 * j] = luminance;
@@ -185,7 +187,7 @@ public class App {
             copyImage1();
         }
         try {
-            Util.writeJpeg(f, image2, 0.7f);
+            ReadWriteUtil.writeJpeg(f, image2, 0.7f);
         } catch (IOException ex) {
             Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -293,18 +295,15 @@ public class App {
         byte[] pixelArray = Util.getPixelArray(image2);
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w / 3; j++) {
-                pixelArray[i * w + 3 * j] = negativePixel(pixelArray[i * w + 3 * j]);
-                pixelArray[i * w + 3 * j + 1] = negativePixel(pixelArray[i * w + 3 * j + 1]);
-                pixelArray[i * w + 3 * j + 2] = negativePixel(pixelArray[i * w + 3 * j + 2]);
+                pixelArray[i * w + 3 * j] = Util.negativePixel(pixelArray[i * w + 3 * j]);
+                pixelArray[i * w + 3 * j + 1] = Util.negativePixel(pixelArray[i * w + 3 * j + 1]);
+                pixelArray[i * w + 3 * j + 2] = Util.negativePixel(pixelArray[i * w + 3 * j + 2]);
             }
         }
         updateImage2();
     }
 
-    private byte negativePixel(byte pixel) {
-        int p = (int) pixel & 0xff;
-        return (byte) (255 - p);
-    }
+    
 
     public void histogramEqualization() {
         if (image2 == null) {
@@ -313,58 +312,34 @@ public class App {
         byte[] pixelArray = Util.getPixelArray(image2);
         int h = image2.getHeight();
         int w = 3 * image2.getWidth();
-        byte[] grayscale = grayscale(pixelArray, h, w);
-        int[] grayscaleHistogram = grayscaleHistogram(grayscale);
-        int[] cumulativeHistogram = cumulativeHistogram(grayscaleHistogram, pixelArray.length/3);
-        int sum = 0;
-        for(int i = 0; i < grayscaleHistogram.length; i++) sum += grayscaleHistogram[i];
+        byte[] grayscale = Util.grayscale(pixelArray, h, w);
+        int[] grayscaleHistogram = Util.histogram(grayscale, 0);
+        int[] cumulativeHistogram = Util.cumulativeHistogram(grayscaleHistogram, pixelArray.length / 3);
         byte[] newImage = new byte[pixelArray.length];
         for (int i = 0; i < h * w; i++) {
-            newImage[i] = (byte) cumulativeHistogram[toInt(pixelArray[i])];
+            newImage[i] = (byte) cumulativeHistogram[Util.toInt(pixelArray[i])];
         }
         System.arraycopy(newImage, 0, pixelArray, 0, pixelArray.length);
         updateImage2();
     }
 
-    private byte[] grayscale(byte[] image, int h, int w) {
-        byte[] grayscale = new byte[image.length];
-        for (int i = 0; i < h; i++) {
-            for (int j = 0; j < w / 3; j++) {
-                int r = (int) image[i * w + 3 * j] & 0xff;
-                int g = (int) image[i * w + 3 * j + 1] & 0xff;
-                int b = (int) image[i * w + 3 * j + 2] & 0xff;
-                double l = (0.299 * r + 0.587 * g + 0.114 * b);
-                byte luminance = (byte) l;
-                grayscale[i * w + 3 * j] = luminance;
-                grayscale[i * w + 3 * j + 1] = luminance;
-                grayscale[i * w + 3 * j + 2] = luminance;
-            }
+    public void histogramEqualizationLab() {
+        if (image2 == null) {
+            copyImage1();
         }
-        return grayscale;
-    }
-
-    private int[] grayscaleHistogram(byte[] grayscale) {
-        int[] histogram = new int[256];
-        for (int i = 0; i < grayscale.length; i = i + 3) {
-            histogram[toInt(grayscale[i])]++;
+        byte[] pixelArray = Util.getPixelArray(image2);
+        int h = image2.getHeight();
+        int w = 3 * image2.getWidth();
+        float[] lab = Util.srgb2lab(pixelArray, h, w);
+        int[] histogramL = Util.histogram(lab, 0);
+        int[] cumulativeHistogram = Util.cumulativeHistogram(histogramL, pixelArray.length / 3);
+        float[] newImageLab = lab.clone();
+        for (int i = 0; i < h * w; i = i+3) {
+            newImageLab[i] = (float) (cumulativeHistogram[(int) Math.round(lab[i])]/2.55);
         }
-        return histogram;
+        byte[] newImageSrgb = Util.lab2srgb(newImageLab, h, w);
+        System.arraycopy(newImageSrgb, 0, pixelArray, 0, pixelArray.length);
+        updateImage2();
     }
-
-    private int toInt(byte b) {
-        return (int) b & 0xff;
-    }
-
-    private int[] cumulativeHistogram(int[] histogram, int numberOfPixels) {
-        int[] cumulativeHistogram = new int[256];
-        double[] cumulativeDouble = new double[256];
-        double alpha = 255.0 / numberOfPixels;
-        cumulativeHistogram[0] = (int) (alpha * histogram[0]);
-        cumulativeDouble[0] = alpha * histogram[0];
-        for (int i = 1; i < 256; i++) {
-            cumulativeDouble[i] = cumulativeDouble[i - 1] + (alpha * histogram[i]);
-            cumulativeHistogram[i] = (int) cumulativeDouble[i];
-        }
-        return cumulativeHistogram;
-    }
+    
 }

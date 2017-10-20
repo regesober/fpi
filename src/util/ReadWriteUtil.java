@@ -3,11 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package main;
+package util;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
-import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +21,7 @@ import javax.imageio.stream.FileImageOutputStream;
  *
  * @author regesober
  */
-public class Util {
+public class ReadWriteUtil {
 
     public static BufferedImage readJpeg(String filename) throws IOException {
         BufferedImage bufferedImage = ImageIO.read(new File(filename));
@@ -52,11 +51,6 @@ public class Util {
         boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
         WritableRaster raster = image.copyData(image.getRaster().createCompatibleWritableRaster());
         return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
-    }
-
-    public static byte[] getPixelArray(BufferedImage image) {
-        byte[] pixelArray = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-        return pixelArray;
     }
 
 }

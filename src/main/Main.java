@@ -5,8 +5,12 @@
  */
 package main;
 
+import java.awt.color.ColorSpace;
+import java.awt.color.ICC_ColorSpace;
+import util.ReadWriteUtil;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,9 +27,10 @@ public class Main {
         //readAndWriteJpeg("Gramado_22k.jpg");
         
         try {
-            BufferedImage readJpeg = Util.readJpeg(args[0]);
+            BufferedImage readJpeg = ReadWriteUtil.readJpeg(args[0]);
             App app = App.getInstance();
             app.setImage1(readJpeg);
+            
         } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -33,8 +38,8 @@ public class Main {
 
     private static void readAndWriteJpeg(String filename) {
         try {
-            BufferedImage image = Util.readJpeg(filename);
-            Util.writeJpeg("out_" + filename, image, 1.0f);
+            BufferedImage image = ReadWriteUtil.readJpeg(filename);
+            ReadWriteUtil.writeJpeg("out_" + filename, image, 1.0f);
         } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
