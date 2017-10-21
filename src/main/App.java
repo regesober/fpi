@@ -11,7 +11,6 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
@@ -40,6 +39,9 @@ public class App {
     private BufferedImage image1;
     private BufferedImage image2;
 
+    private static final int MAIN_FRAME_H = 600;
+    private static final int MAIN_FRAME_W = 250;
+
     private static App a = null;
 
     private App() {
@@ -61,7 +63,7 @@ public class App {
         frame1 = new JFrame();
         frame1.add(panel1);
         frame1.setVisible(true);
-        frame1.setBounds(250, 0, image1.getWidth(), image1.getHeight());
+        frame1.setBounds(MAIN_FRAME_W, 0, image1.getWidth(), image1.getHeight() + 40);
         frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         panel2 = new JPanel(new BorderLayout());
@@ -69,12 +71,12 @@ public class App {
         frame2 = new JFrame();
         frame2.add(panel2);
         frame2.setVisible(true);
-        frame2.setBounds(250 + image1.getWidth(), 0, image1.getWidth(), image1.getHeight());
+        frame2.setBounds(MAIN_FRAME_W + image1.getWidth(), 0, image1.getWidth(), image1.getHeight() + 40);
         frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         MainFrame mainFrame = new MainFrame();
         mainFrame.setVisible(true);
-        mainFrame.setBounds(0, 0, 250, 500);
+        mainFrame.setBounds(0, 0, MAIN_FRAME_W, MAIN_FRAME_H);
 
         this.image1 = image1;
         panel1.add(new JLabel(new ImageIcon(image1)));
@@ -96,6 +98,23 @@ public class App {
         panel2.removeAll();
         panel2.add(new JLabel(new ImageIcon(image2)));
         frame2.revalidate();
+    }
+
+    private void updateImage2(byte[] pixelArray, int h, int w) {
+        image2 = new BufferedImage(w / 3, h, BufferedImage.TYPE_3BYTE_BGR);
+        for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w; j = j + 3) {
+                int rgb = Util.toInt(pixelArray[i * w + j + 2]);
+                rgb = (rgb << 8) + Util.toInt(pixelArray[i * w + j + 1]);
+                rgb = (rgb << 8) + Util.toInt(pixelArray[i * w + j]);
+                image2.setRGB(j / 3, i, rgb);
+            }
+        }
+        panel2.removeAll();
+        panel2.add(new JLabel(new ImageIcon(image2)));
+        frame2.setBounds(MAIN_FRAME_W + image1.getWidth(), 0, image2.getWidth(), image2.getHeight() + 40);
+        frame2.revalidate();
+
     }
 
     public void mirrrorVertical() {
@@ -303,8 +322,6 @@ public class App {
         updateImage2();
     }
 
-    
-
     public void histogramEqualization() {
         if (image2 == null) {
             copyImage1();
@@ -334,39 +351,79 @@ public class App {
         int[] histogramL = Util.histogram(lab, 0);
         int[] cumulativeHistogram = Util.cumulativeHistogram(histogramL, pixelArray.length / 3);
         float[] newImageLab = lab.clone();
-        for (int i = 0; i < h * w; i = i+3) {
-            newImageLab[i] = (float) (cumulativeHistogram[(int) Math.round(lab[i])]/2.55);
+        for (int i = 0; i < h * w; i = i + 3) {
+            newImageLab[i] = (float) (cumulativeHistogram[(int) Math.round(lab[i])] / 2.55);
         }
         byte[] newImageSrgb = Util.lab2srgb(newImageLab, h, w);
         System.arraycopy(newImageSrgb, 0, pixelArray, 0, pixelArray.length);
         updateImage2();
     }
-    
-    public void histogramMatching(File f) throws IOException{
+
+    public void histogramMatching(File f) throws IOException {
         if (image2 == null) {
             copyImage1();
         }
         BufferedImage targetBI = ReadWriteUtil.readJpeg(f);
         byte[] source = Util.getPixelArray(image2);
         byte[] target = Util.getPixelArray(targetBI);
-        Util.grayscaleInPlace(source, image2.getHeight(), image2.getWidth()*3);
-        Util.grayscaleInPlace(target, targetBI.getHeight(), targetBI.getWidth()*3);
+        Util.grayscaleInPlace(source, image2.getHeight(), image2.getWidth() * 3);
+        Util.grayscaleInPlace(target, targetBI.getHeight(), targetBI.getWidth() * 3);
         int[] sourceHistogram = Util.histogram(source, 0);
         int[] targetHistogram = Util.histogram(target, 0);
-        int[] sourceCumulativeHistogram = Util.cumulativeHistogram(sourceHistogram, source.length/3);
-        int[] targetCumulativeHistogram = Util.cumulativeHistogram(targetHistogram, target.length/3);
+        int[] sourceCumulativeHistogram = Util.cumulativeHistogram(sourceHistogram, source.length / 3);
+        int[] targetCumulativeHistogram = Util.cumulativeHistogram(targetHistogram, target.length / 3);
         int[] HM = new int[256];
         byte[] sourceHM = new byte[source.length];
-        for (int i = 0; i < 256; i++){
+        for (int i = 0; i < 256; i++) {
             HM[i] = Util.closestShade(targetCumulativeHistogram, sourceCumulativeHistogram[i]);
         }
-        for (int i = 0; i < image2.getHeight() * image2.getWidth() * 3; i = i+3){
+        for (int i = 0; i < image2.getHeight() * image2.getWidth() * 3; i = i + 3) {
             sourceHM[i] = (byte) HM[Util.toInt(source[i])];
-            sourceHM[i+1] = sourceHM[i];
-            sourceHM[i+2] = sourceHM[i];
+            sourceHM[i + 1] = sourceHM[i];
+            sourceHM[i + 2] = sourceHM[i];
         }
         System.arraycopy(sourceHM, 0, source, 0, source.length);
         updateImage2();
     }
-    
+
+    public void zoomOut(String x, String y) {
+        try {
+            int sx = Integer.parseInt(x);
+            int sy = Integer.parseInt(y);
+            if (image2 == null) {
+                copyImage1();
+            }
+            byte[] pixelArray = Util.getPixelArray(image2);
+            byte[] newImage = new byte[pixelArray.length];
+            int h = image2.getHeight();
+            int w = 3 * image2.getWidth();
+            for (int i = 0; i < h; i = i + sx) {
+                for (int j = 0; j < w; j = j + 3 * sy) {
+                    int ra = 0;
+                    int ga = 0;
+                    int ba = 0;
+                    int den = 0;
+                    for (int ix = i; ix < i + sx && ix < h; ix++) {
+                        for (int jy = j; jy < j + sy && jy < w; jy = jy + 3) {
+                            den++;
+                            ra += Util.toInt(pixelArray[ix * w + jy]);
+                            ga += Util.toInt(pixelArray[ix * w + jy + 1]);
+                            ba += Util.toInt(pixelArray[ix * w + jy + 2]);
+                        }
+                    }
+                    int test = (i / sx) * w / sy + j / sy;
+                    if (test == 89355) {
+                        System.out.println("a");
+                    }
+                    newImage[(i / sx) * w / sy + j / sy] = (byte) (ra / den);
+                    newImage[(i / sx) * w / sy + j / sy + 1] = (byte) (ga / den);
+                    newImage[(i / sx) * w / sy + j / sy + 2] = (byte) (ba / den);
+                }
+            }
+            updateImage2(newImage, h / sx, w / sy);
+        } catch (NumberFormatException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
 }

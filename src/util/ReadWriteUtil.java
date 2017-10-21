@@ -8,8 +8,11 @@ package util;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
@@ -26,7 +29,7 @@ public class ReadWriteUtil {
     public static BufferedImage readJpeg(String filename) throws IOException {
         return readJpeg(new File(filename));
     }
-    
+
     public static BufferedImage readJpeg(File f) throws IOException {
         BufferedImage bufferedImage = ImageIO.read(f);
         return bufferedImage;
@@ -57,4 +60,13 @@ public class ReadWriteUtil {
         return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
     }
 
+    public static BufferedImage byteArrayToImage(byte[] byteArray){
+        try {
+            return ImageIO.read(new ByteArrayInputStream(byteArray));
+        } catch (IOException ex) {
+            Logger.getLogger(ReadWriteUtil.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+    
 }
