@@ -96,6 +96,21 @@ public class Util {
         }
         return grayscale;
     }
+    
+    public static void grayscaleInPlace(byte[] image, int h, int w){
+        for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w / 3; j++) {
+                int r = toInt(image[i * w + 3 * j]);
+                int g = toInt(image[i * w + 3 * j + 1]);
+                int b = toInt(image[i * w + 3 * j + 2]);
+                double l = (0.299 * r + 0.587 * g + 0.114 * b);
+                byte luminance = (byte) l;
+                image[i * w + 3 * j] = luminance;
+                image[i * w + 3 * j + 1] = luminance;
+                image[i * w + 3 * j + 2] = luminance;
+            }
+        }
+    }
 
     public static byte[] getPixelArray(BufferedImage image) {
         byte[] pixelArray = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
@@ -107,4 +122,17 @@ public class Util {
         return (byte) (255 - p);
     }
 
+    public static int closestShade(int[] histogram, int shade){
+        int dif = Math.abs(histogram[0] - shade);
+        int ind = 0;
+        for (int i = 1; i < 256; i++){
+            int newDif = Math.abs(histogram[i] - shade);
+            if (newDif < dif){
+                dif = newDif;
+                ind = i;
+            }
+        }
+        return histogram[ind];
+    }
+    
 }

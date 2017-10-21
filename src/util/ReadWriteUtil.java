@@ -24,7 +24,11 @@ import javax.imageio.stream.FileImageOutputStream;
 public class ReadWriteUtil {
 
     public static BufferedImage readJpeg(String filename) throws IOException {
-        BufferedImage bufferedImage = ImageIO.read(new File(filename));
+        return readJpeg(new File(filename));
+    }
+    
+    public static BufferedImage readJpeg(File f) throws IOException {
+        BufferedImage bufferedImage = ImageIO.read(f);
         return bufferedImage;
     }
 

@@ -342,4 +342,31 @@ public class App {
         updateImage2();
     }
     
+    public void histogramMatching(File f) throws IOException{
+        if (image2 == null) {
+            copyImage1();
+        }
+        BufferedImage targetBI = ReadWriteUtil.readJpeg(f);
+        byte[] source = Util.getPixelArray(image2);
+        byte[] target = Util.getPixelArray(targetBI);
+        Util.grayscaleInPlace(source, image2.getHeight(), image2.getWidth()*3);
+        Util.grayscaleInPlace(target, targetBI.getHeight(), targetBI.getWidth()*3);
+        int[] sourceHistogram = Util.histogram(source, 0);
+        int[] targetHistogram = Util.histogram(target, 0);
+        int[] sourceCumulativeHistogram = Util.cumulativeHistogram(sourceHistogram, source.length/3);
+        int[] targetCumulativeHistogram = Util.cumulativeHistogram(targetHistogram, target.length/3);
+        int[] HM = new int[256];
+        byte[] sourceHM = new byte[source.length];
+        for (int i = 0; i < 256; i++){
+            HM[i] = Util.closestShade(targetCumulativeHistogram, sourceCumulativeHistogram[i]);
+        }
+        for (int i = 0; i < image2.getHeight() * image2.getWidth() * 3; i = i+3){
+            sourceHM[i] = (byte) HM[Util.toInt(source[i])];
+            sourceHM[i+1] = sourceHM[i];
+            sourceHM[i+2] = sourceHM[i];
+        }
+        System.arraycopy(sourceHM, 0, source, 0, source.length);
+        updateImage2();
+    }
+    
 }
