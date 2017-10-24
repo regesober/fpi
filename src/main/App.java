@@ -11,7 +11,6 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
@@ -106,7 +105,7 @@ public class App {
         try {
             BufferedImage temp = new BufferedImage(w / 3, h, BufferedImage.TYPE_3BYTE_BGR);
             for (int i = 0; i < h; i++) {
-                for (int j = 0; j < w; j = j + 3) {
+                for (int j = 0; j < w && j / 3 < w / 3; j = j + 3) {
                     int rgb = Util.toInt(pixelArray[i * w + j + 2]);
                     rgb = (rgb << 8) + Util.toInt(pixelArray[i * w + j + 1]);
                     rgb = (rgb << 8) + Util.toInt(pixelArray[i * w + j]);
@@ -118,7 +117,7 @@ public class App {
             panel2.add(new JLabel(new ImageIcon(image2)));
             frame2.setBounds(MAIN_FRAME_W + image1.getWidth(), 0, image2.getWidth(), image2.getHeight() + 35);
             frame2.revalidate();
-        } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
