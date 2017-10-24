@@ -11,6 +11,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
@@ -63,7 +64,7 @@ public class App {
         frame1 = new JFrame();
         frame1.add(panel1);
         frame1.setVisible(true);
-        frame1.setBounds(MAIN_FRAME_W, 0, image1.getWidth(), image1.getHeight() + 40);
+        frame1.setBounds(MAIN_FRAME_W, 0, image1.getWidth(), image1.getHeight() + 35);
         frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         panel2 = new JPanel(new BorderLayout());
@@ -71,7 +72,7 @@ public class App {
         frame2 = new JFrame();
         frame2.add(panel2);
         frame2.setVisible(true);
-        frame2.setBounds(MAIN_FRAME_W + image1.getWidth(), 0, image1.getWidth(), image1.getHeight() + 40);
+        frame2.setBounds(MAIN_FRAME_W + image1.getWidth(), 0, image1.getWidth(), image1.getHeight() + 35);
         frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         MainFrame mainFrame = new MainFrame();
@@ -97,7 +98,7 @@ public class App {
     private void updateImage2() {
         panel2.removeAll();
         panel2.add(new JLabel(new ImageIcon(image2)));
-        frame2.setBounds(MAIN_FRAME_W + image1.getWidth(), 0, image1.getWidth(), image1.getHeight() + 40);
+        frame2.setBounds(MAIN_FRAME_W + image1.getWidth(), 0, image1.getWidth(), image1.getHeight() + 35);
         frame2.revalidate();
     }
 
@@ -115,7 +116,7 @@ public class App {
             image2 = temp;
             panel2.removeAll();
             panel2.add(new JLabel(new ImageIcon(image2)));
-            frame2.setBounds(MAIN_FRAME_W + image1.getWidth(), 0, image2.getWidth(), image2.getHeight() + 40);
+            frame2.setBounds(MAIN_FRAME_W + image1.getWidth(), 0, image2.getWidth(), image2.getHeight() + 35);
             frame2.revalidate();
         } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
@@ -353,11 +354,11 @@ public class App {
         int h = image2.getHeight();
         int w = 3 * image2.getWidth();
         float[] lab = Util.srgb2lab(pixelArray, h, w);
-        int[] histogramL = Util.histogram(lab, 0);
-        int[] cumulativeHistogram = Util.cumulativeHistogram(histogramL, pixelArray.length / 3);
+        int[] histogramL = Util.histogram(lab, 0, 101);
+        int[] cumulativeHistogram = Util.cumulativeHistogram(histogramL, pixelArray.length / 3, 101);
         float[] newImageLab = lab.clone();
         for (int i = 0; i < h * w; i = i + 3) {
-            newImageLab[i] = (float) (cumulativeHistogram[(int) Math.round(lab[i])] / 2.55);
+            newImageLab[i] = (float) (cumulativeHistogram[(int) Math.round(lab[i])]) + 10;
         }
         byte[] newImageSrgb = Util.lab2srgb(newImageLab, h, w);
         System.arraycopy(newImageSrgb, 0, pixelArray, 0, pixelArray.length);

@@ -63,6 +63,14 @@ public class Util {
         return histogram;
     }
 
+    public static int[] histogram(float[] image, int channel, int size) {
+        int[] histogram = new int[size];
+        for (int i = channel; i < image.length; i = i + 3) {
+            histogram[(int) Math.round(image[i])]++;
+        }
+        return histogram;
+    }
+
     public static int toInt(byte b) {
         return (int) b & 0xff;
     }
@@ -74,6 +82,19 @@ public class Util {
         cumulativeHistogram[0] = (int) (alpha * histogram[0]);
         cumulativeDouble[0] = alpha * histogram[0];
         for (int i = 1; i < 256; i++) {
+            cumulativeDouble[i] = cumulativeDouble[i - 1] + (alpha * histogram[i]);
+            cumulativeHistogram[i] = (int) cumulativeDouble[i];
+        }
+        return cumulativeHistogram;
+    }
+
+    public static int[] cumulativeHistogram(int[] histogram, int numberOfPixels, int size) {
+        int[] cumulativeHistogram = new int[size];
+        double[] cumulativeDouble = new double[size];
+        double alpha = ((float) size) / numberOfPixels;
+        cumulativeHistogram[0] = (int) (alpha * histogram[0]);
+        cumulativeDouble[0] = alpha * histogram[0];
+        for (int i = 1; i < size; i++) {
             cumulativeDouble[i] = cumulativeDouble[i - 1] + (alpha * histogram[i]);
             cumulativeHistogram[i] = (int) cumulativeDouble[i];
         }
