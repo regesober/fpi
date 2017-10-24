@@ -21,9 +21,9 @@ public class Util {
                 int r = toInt(image[i * w + 3 * j]);
                 int g = toInt(image[i * w + 3 * j + 1]);
                 int b = toInt(image[i * w + 3 * j + 2]);
-                float sr = (float)(r/255.0);
-                float sg = (float)(g/255.0);
-                float sb = (float)(b/255.0);
+                float sr = (float) (r / 255.0);
+                float sg = (float) (g / 255.0);
+                float sb = (float) (b / 255.0);
                 float[] labBuffer = CIELab.getInstance().fromRGB(new float[]{sr, sg, sb});
                 lab[i * w + 3 * j] = labBuffer[0];
                 lab[i * w + 3 * j + 1] = labBuffer[1];
@@ -39,9 +39,9 @@ public class Util {
             for (int j = 0; j < w / 3; j++) {
                 float[] labBuffer = new float[]{lab[i * w + 3 * j], lab[i * w + 3 * j + 1], lab[i * w + 3 * j + 2]};
                 float[] rgbBuffer = CIELab.getInstance().toRGB(labBuffer);
-                rgb[i * w + 3 * j] = (byte) (rgbBuffer[0]*255.0);
-                rgb[i * w + 3 * j + 1] = (byte) (rgbBuffer[1]*255.0);
-                rgb[i * w + 3 * j + 2] = (byte) (rgbBuffer[2]*255.0);
+                rgb[i * w + 3 * j] = (byte) (rgbBuffer[0] * 255.0);
+                rgb[i * w + 3 * j + 1] = (byte) (rgbBuffer[1] * 255.0);
+                rgb[i * w + 3 * j + 2] = (byte) (rgbBuffer[2] * 255.0);
             }
         }
         return rgb;
@@ -96,8 +96,8 @@ public class Util {
         }
         return grayscale;
     }
-    
-    public static void grayscaleInPlace(byte[] image, int h, int w){
+
+    public static void grayscaleInPlace(byte[] image, int h, int w) {
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w / 3; j++) {
                 int r = toInt(image[i * w + 3 * j]);
@@ -122,17 +122,29 @@ public class Util {
         return (byte) (255 - p);
     }
 
-    public static int closestShade(int[] histogram, int shade){
+    public static int closestShade(int[] histogram, int shade) {
         int dif = Math.abs(histogram[0] - shade);
         int ind = 0;
-        for (int i = 1; i < 256; i++){
+        for (int i = 1; i < 256; i++) {
             int newDif = Math.abs(histogram[i] - shade);
-            if (newDif < dif){
+            if (newDif < dif) {
                 dif = newDif;
                 ind = i;
             }
         }
         return histogram[ind];
     }
-    
+
+    public static void copyPixel(byte[] source, int i, byte[] target, int j) {
+        target[j] = source[i];
+        target[j + 1] = source[i + 1];
+        target[j + 2] = source[i + 2];
+    }
+
+    public static void interpolatePixel(byte[] target, int i, int j, int k) {
+        target[k] = (byte) ((toInt(target[i]) + toInt(target[j])) / 2);
+        target[k + 1] = (byte) ((toInt(target[i + 1]) + toInt(target[j + 1])) / 2);
+        target[k + 2] = (byte) ((toInt(target[i + 2]) + toInt(target[j + 2])) / 2);
+    }
+
 }

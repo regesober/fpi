@@ -97,24 +97,29 @@ public class App {
     private void updateImage2() {
         panel2.removeAll();
         panel2.add(new JLabel(new ImageIcon(image2)));
+        frame2.setBounds(MAIN_FRAME_W + image1.getWidth(), 0, image1.getWidth(), image1.getHeight() + 40);
         frame2.revalidate();
     }
 
     private void updateImage2(byte[] pixelArray, int h, int w) {
-        image2 = new BufferedImage(w / 3, h, BufferedImage.TYPE_3BYTE_BGR);
-        for (int i = 0; i < h; i++) {
-            for (int j = 0; j < w; j = j + 3) {
-                int rgb = Util.toInt(pixelArray[i * w + j + 2]);
-                rgb = (rgb << 8) + Util.toInt(pixelArray[i * w + j + 1]);
-                rgb = (rgb << 8) + Util.toInt(pixelArray[i * w + j]);
-                image2.setRGB(j / 3, i, rgb);
+        try {
+            BufferedImage temp = new BufferedImage(w / 3, h, BufferedImage.TYPE_3BYTE_BGR);
+            for (int i = 0; i < h; i++) {
+                for (int j = 0; j < w; j = j + 3) {
+                    int rgb = Util.toInt(pixelArray[i * w + j + 2]);
+                    rgb = (rgb << 8) + Util.toInt(pixelArray[i * w + j + 1]);
+                    rgb = (rgb << 8) + Util.toInt(pixelArray[i * w + j]);
+                    temp.setRGB(j / 3, i, rgb);
+                }
             }
+            image2 = temp;
+            panel2.removeAll();
+            panel2.add(new JLabel(new ImageIcon(image2)));
+            frame2.setBounds(MAIN_FRAME_W + image1.getWidth(), 0, image2.getWidth(), image2.getHeight() + 40);
+            frame2.revalidate();
+        } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
-        panel2.removeAll();
-        panel2.add(new JLabel(new ImageIcon(image2)));
-        frame2.setBounds(MAIN_FRAME_W + image1.getWidth(), 0, image2.getWidth(), image2.getHeight() + 40);
-        frame2.revalidate();
-
     }
 
     public void mirrrorVertical() {
@@ -411,10 +416,6 @@ public class App {
                             ba += Util.toInt(pixelArray[ix * w + jy + 2]);
                         }
                     }
-                    int test = (i / sx) * w / sy + j / sy;
-                    if (test == 89355) {
-                        System.out.println("a");
-                    }
                     newImage[(i / sx) * w / sy + j / sy] = (byte) (ra / den);
                     newImage[(i / sx) * w / sy + j / sy + 1] = (byte) (ga / den);
                     newImage[(i / sx) * w / sy + j / sy + 2] = (byte) (ba / den);
@@ -424,6 +425,51 @@ public class App {
         } catch (NumberFormatException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    public void zoomIn() {
+        if (image2 == null) {
+            copyImage1();
+        }
+        byte[] pixelArray = Util.getPixelArray(image2);
+        byte[] newImage = new byte[4 * pixelArray.length];
+        int h = image2.getHeight();
+        int w = 3 * image2.getWidth();
+        for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w; j = j + 3) {
+                Util.copyPixel(pixelArray, i * w + j, newImage, i * w * 4 + j * 2);
+            }
+        }
+        for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w; j = j + 3) {
+                int p11 = i * w * 4 + j * 2;
+                int p12 = p11 + 3;
+                int p13 = p12 + 3;
+                if (j < w - 3) {
+                    Util.interpolatePixel(newImage, p11, p13, p12);
+                } else {
+                    Util.copyPixel(newImage, p11, newImage, p12);
+                }
+            }
+        }
+        for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w; j = j + 3) {
+                int p11 = i * w * 4 + j * 2;
+                int p12 = p11 + 3;
+                int p21 = p11 + w * 2;
+                int p22 = p21 + 3;
+                int p31 = p21 + w * 2;
+                int p32 = p31 + 3;
+                if (i < h - 1) {
+                    Util.interpolatePixel(newImage, p11, p31, p21);
+                    Util.interpolatePixel(newImage, p12, p32, p22);
+                } else {
+                    Util.copyPixel(newImage, p11, newImage, p21);
+                    Util.copyPixel(newImage, p12, newImage, p22);
+                }
+            }
+        }
+        updateImage2(newImage, h * 2, w * 2);
     }
 
 }
