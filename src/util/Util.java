@@ -162,10 +162,16 @@ public class Util {
         target[j + 2] = source[i + 2];
     }
 
-    public static void interpolatePixel(byte[] target, int i, int j, int k) {
-        target[k] = (byte) ((toInt(target[i]) + toInt(target[j])) / 2);
-        target[k + 1] = (byte) ((toInt(target[i + 1]) + toInt(target[j + 1])) / 2);
-        target[k + 2] = (byte) ((toInt(target[i + 2]) + toInt(target[j + 2])) / 2);
+    public static void interpolatePixel(byte[] pixelArray, int i, int j, int k) {
+        pixelArray[k] = (byte) ((toInt(pixelArray[i]) + toInt(pixelArray[j])) / 2);
+        pixelArray[k + 1] = (byte) ((toInt(pixelArray[i + 1]) + toInt(pixelArray[j + 1])) / 2);
+        pixelArray[k + 2] = (byte) ((toInt(pixelArray[i + 2]) + toInt(pixelArray[j + 2])) / 2);
+    }
+    
+    public static void switchPixel(byte[] pixelArray, int i, int j){
+        byte temp = pixelArray[i];
+        pixelArray[i] = pixelArray[j];
+        pixelArray[j] = temp;
     }
 
 }

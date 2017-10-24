@@ -39,7 +39,7 @@ public class App {
     private BufferedImage image1;
     private BufferedImage image2;
 
-    private static final int MAIN_FRAME_H = 600;
+    private static final int MAIN_FRAME_H = 650;
     private static final int MAIN_FRAME_W = 250;
 
     private static App a = null;
@@ -97,7 +97,7 @@ public class App {
     private void updateImage2() {
         panel2.removeAll();
         panel2.add(new JLabel(new ImageIcon(image2)));
-        frame2.setBounds(MAIN_FRAME_W + image1.getWidth(), 0, image1.getWidth(), image1.getHeight() + 35);
+        frame2.setBounds(MAIN_FRAME_W + image1.getWidth(), 0, image2.getWidth(), image2.getHeight() + 35);
         frame2.revalidate();
     }
 
@@ -470,6 +470,38 @@ public class App {
             }
         }
         updateImage2(newImage, h * 2, w * 2);
+    }
+
+    public void turn90counterClockwise() {
+        if (image2 == null) {
+            copyImage1();
+        }
+        byte[] pixelArray = Util.getPixelArray(image2);
+        byte[] newImage = new byte[pixelArray.length];
+        int h = image2.getHeight();
+        int w = 3 * image2.getWidth();
+        for (int i = 0; i < h-1; i++) {
+            for (int j = 0; j < w; j = j + 3) {
+                Util.copyPixel(pixelArray, i*w + j, newImage, (w/3-1-j/3)*h*3 + i*3);
+            }
+        }
+        updateImage2(newImage, w/3, h*3);
+    }
+    
+    public void turn90clockwise() {
+        if (image2 == null) {
+            copyImage1();
+        }
+        byte[] pixelArray = Util.getPixelArray(image2);
+        byte[] newImage = new byte[pixelArray.length];
+        int h = image2.getHeight();
+        int w = 3 * image2.getWidth();
+        for (int i = 0; i < h-1; i++) {
+            for (int j = 0; j < w; j = j + 3) {
+                Util.copyPixel(pixelArray, i*w + j, newImage, (j/3)*h*3 + (h-1-i)*3);
+            }
+        }
+        updateImage2(newImage, w/3, h*3);
     }
 
 }
