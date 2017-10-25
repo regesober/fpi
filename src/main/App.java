@@ -399,11 +399,15 @@ public class App {
                 copyImage1();
             }
             byte[] pixelArray = Util.getPixelArray(image2);
-            byte[] newImage = new byte[pixelArray.length];
             int h = image2.getHeight();
             int w = 3 * image2.getWidth();
+            int newH = h / sx;
+            int newW = w / sy / 3 * 3;
+            if (newH == 0 || newW == 0)
+                return;
+            byte[] newImage = new byte[pixelArray.length];
             for (int i = 0; i < h; i = i + sx) {
-                for (int j = 0; j < w; j = j + 3 * sy) {
+                for (int j = 0; j < w / sy / 3 * 3 * sy; j = j + 3 * sy) {
                     int ra = 0;
                     int ga = 0;
                     int ba = 0;
@@ -416,12 +420,13 @@ public class App {
                             ba += Util.toInt(pixelArray[ix * w + jy + 2]);
                         }
                     }
-                    newImage[(i / sx) * w / sy + j / sy] = (byte) (ra / den);
-                    newImage[(i / sx) * w / sy + j / sy + 1] = (byte) (ga / den);
-                    newImage[(i / sx) * w / sy + j / sy + 2] = (byte) (ba / den);
+                    newImage[(i / sx) * newW + j / sy] = (byte) (ra / den);
+                    newImage[(i / sx) * newW + j / sy + 1] = (byte) (ga / den);
+                    newImage[(i / sx) * newW + j / sy + 2] = (byte) (ba / den);
                 }
             }
-            updateImage2(newImage, h / sx, w / sy);
+            System.out.println(h / sx + " " + w / 3 * 3 * sy);
+            updateImage2(newImage, newH, newW);
         } catch (NumberFormatException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -480,14 +485,14 @@ public class App {
         byte[] newImage = new byte[pixelArray.length];
         int h = image2.getHeight();
         int w = 3 * image2.getWidth();
-        for (int i = 0; i < h-1; i++) {
+        for (int i = 0; i < h - 1; i++) {
             for (int j = 0; j < w; j = j + 3) {
-                Util.copyPixel(pixelArray, i*w + j, newImage, (w/3-1-j/3)*h*3 + i*3);
+                Util.copyPixel(pixelArray, i * w + j, newImage, (w / 3 - 1 - j / 3) * h * 3 + i * 3);
             }
         }
-        updateImage2(newImage, w/3, h*3);
+        updateImage2(newImage, w / 3, h * 3);
     }
-    
+
     public void turn90clockwise() {
         if (image2 == null) {
             copyImage1();
@@ -496,12 +501,12 @@ public class App {
         byte[] newImage = new byte[pixelArray.length];
         int h = image2.getHeight();
         int w = 3 * image2.getWidth();
-        for (int i = 0; i < h-1; i++) {
+        for (int i = 0; i < h - 1; i++) {
             for (int j = 0; j < w; j = j + 3) {
-                Util.copyPixel(pixelArray, i*w + j, newImage, (j/3)*h*3 + (h-1-i)*3);
+                Util.copyPixel(pixelArray, i * w + j, newImage, (j / 3) * h * 3 + (h - 1 - i) * 3);
             }
         }
-        updateImage2(newImage, w/3, h*3);
+        updateImage2(newImage, w / 3, h * 3);
     }
 
 }
