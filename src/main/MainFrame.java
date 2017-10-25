@@ -197,6 +197,11 @@ public class MainFrame extends javax.swing.JFrame {
         });
 
         jButton18.setText("Convolute");
+        jButton18.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton18ActionPerformed(evt);
+            }
+        });
 
         jLabel1.setText("Sum 127:");
 
@@ -406,6 +411,10 @@ public class MainFrame extends javax.swing.JFrame {
     private void jButton17ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton17ActionPerformed
         App.getInstance().turn90clockwise();
     }//GEN-LAST:event_jButton17ActionPerformed
+
+    private void jButton18ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton18ActionPerformed
+        App.getInstance().convolute(getCheckBox127());
+    }//GEN-LAST:event_jButton18ActionPerformed
 
     /**
      * @param args the command line arguments

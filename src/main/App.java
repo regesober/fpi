@@ -46,7 +46,7 @@ public class App {
 
     private static final int FILTER_FRAME_H = 380;
     private static final int FILTER_FRAME_W = 250;
-    
+
     private static final int HEIGHT_INCREMENT = 35;
 
     private static App a = null;
@@ -97,10 +97,10 @@ public class App {
         frame1.revalidate();
     }
 
-    public MainFrame getMainFrame(){
+    public MainFrame getMainFrame() {
         return mainFrame;
     }
-    
+
     public void copyImage1() {
         this.image2 = ReadWriteUtil.copyImage(image1);
         updateImage2();
@@ -522,6 +522,28 @@ public class App {
             }
         }
         updateImage2(newImage, w / 3, h * 3);
+    }
+
+    public void convolute(boolean sum127) {
+        if (image2 == null) {
+            copyImage1();
+        }
+        double[] filter = filterFrame.getFilter();
+        if (filter == null) {
+            return;
+        }
+        byte[] pixelArray = Util.getPixelArray(image2);
+        byte[] newImage = new byte[pixelArray.length];
+        Util.copyImage(pixelArray, newImage);
+        int h = image2.getHeight();
+        int w = 3 * image2.getWidth();
+        for (int i = 1; i < h - 1; i++) {
+            for (int j = 3; j < w - 3; j = j + 3) {
+                Util.convolutePixel(pixelArray, newImage, filter, i, j, h, w);
+            }
+        }
+        Util.copyImage(newImage, pixelArray);
+        updateImage2();
     }
 
 }

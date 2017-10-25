@@ -167,11 +167,57 @@ public class Util {
         pixelArray[k + 1] = (byte) ((toInt(pixelArray[i + 1]) + toInt(pixelArray[j + 1])) / 2);
         pixelArray[k + 2] = (byte) ((toInt(pixelArray[i + 2]) + toInt(pixelArray[j + 2])) / 2);
     }
-    
-    public static void switchPixel(byte[] pixelArray, int i, int j){
+
+    public static void switchPixel(byte[] pixelArray, int i, int j) {
         byte temp = pixelArray[i];
         pixelArray[i] = pixelArray[j];
         pixelArray[j] = temp;
+    }
+
+    public static void copyImage(byte[] source, byte[] target) {
+        System.arraycopy(source, 0, target, 0, source.length);
+    }
+
+    public static void convolutePixel(byte[] source, byte[] target, double[] filter, int i, int j, int h, int w) {
+        int p22 = i * w + j;
+        int p12 = p22 - w;
+        int p11 = p12 - 3;
+        int p13 = p12 + 3;
+        int p21 = p22 - 3;
+        int p23 = p22 + 3;
+        int p32 = p22 + w;
+        int p31 = p32 - 3;
+        int p33 = p32 + 3;
+        int[] pixelIndexes = new int[]{p11, p12, p13, p21, p22, p23, p31, p32, p33};
+        double[] bgr = new double[3];
+        double b = 0;
+        double g = 0;
+        double r = 0;
+        for (int k = 0; k < pixelIndexes.length; k++) {
+            multiplyPixel(source, bgr, pixelIndexes[k], filter[k]);
+            b += bgr[0];
+            g += bgr[1];
+            r += bgr[2];
+        }
+        target[p22] = toByte((int) b);
+        target[p22 + 1] = toByte((int) g);
+        target[p22 + 2] = toByte((int) r);
+    }
+
+    public static void multiplyPixel(byte[] source, double[] bgr, int i, double value) {
+        bgr[0] = toInt(source[i]) * value;
+        bgr[1] = toInt(source[i + 1]) * value;
+        bgr[2] = toInt(source[i + 2]) * value;
+    }
+
+    public static byte toByte(int a) {
+        if (a > 255) {
+            return (byte) 255;
+        }
+        if (a < 0) {
+            return (byte) 0;
+        }
+        return (byte) a;
     }
 
 }

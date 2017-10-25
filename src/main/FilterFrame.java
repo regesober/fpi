@@ -6,6 +6,8 @@
 package main;
 
 import java.awt.Dimension;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -265,17 +267,22 @@ public class FilterFrame extends javax.swing.JFrame {
     }
 
     public double[] getFilter() {
-        double[] filter = new double[9];
-        filter[0] = Double.parseDouble(jTextField1.getText());
-        filter[1] = Double.parseDouble(jTextField2.getText());
-        filter[2] = Double.parseDouble(jTextField3.getText());
-        filter[3] = Double.parseDouble(jTextField4.getText());
-        filter[4] = Double.parseDouble(jTextField5.getText());
-        filter[5] = Double.parseDouble(jTextField6.getText());
-        filter[6] = Double.parseDouble(jTextField7.getText());
-        filter[7] = Double.parseDouble(jTextField8.getText());
-        filter[8] = Double.parseDouble(jTextField9.getText());
-        return filter;
+        try {
+            double[] filter = new double[9];
+            filter[0] = Double.parseDouble(jTextField1.getText());
+            filter[1] = Double.parseDouble(jTextField2.getText());
+            filter[2] = Double.parseDouble(jTextField3.getText());
+            filter[3] = Double.parseDouble(jTextField4.getText());
+            filter[4] = Double.parseDouble(jTextField5.getText());
+            filter[5] = Double.parseDouble(jTextField6.getText());
+            filter[6] = Double.parseDouble(jTextField7.getText());
+            filter[7] = Double.parseDouble(jTextField8.getText());
+            filter[8] = Double.parseDouble(jTextField9.getText());
+            return filter;
+        } catch (NumberFormatException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 
     /**
