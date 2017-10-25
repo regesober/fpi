@@ -36,11 +36,18 @@ public class App {
     private JPanel panel2;
     private JFrame frame1;
     private JFrame frame2;
+    private MainFrame mainFrame;
+    private FilterFrame filterFrame;
     private BufferedImage image1;
     private BufferedImage image2;
 
-    private static final int MAIN_FRAME_H = 650;
+    private static final int MAIN_FRAME_H = 700;
     private static final int MAIN_FRAME_W = 250;
+
+    private static final int FILTER_FRAME_H = 380;
+    private static final int FILTER_FRAME_W = 250;
+    
+    private static final int HEIGHT_INCREMENT = 35;
 
     private static App a = null;
 
@@ -62,27 +69,38 @@ public class App {
         panel1.setVisible(true);
         frame1 = new JFrame();
         frame1.add(panel1);
+        frame1.setTitle("ORIGINAL IMAGE");
         frame1.setVisible(true);
-        frame1.setBounds(MAIN_FRAME_W, 0, image1.getWidth(), image1.getHeight() + 35);
+        frame1.setBounds(MAIN_FRAME_W, 0, image1.getWidth(), image1.getHeight() + HEIGHT_INCREMENT);
         frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         panel2 = new JPanel(new BorderLayout());
         panel2.setVisible(true);
         frame2 = new JFrame();
         frame2.add(panel2);
+        frame2.setTitle("WORKBENCH IMAGE");
         frame2.setVisible(true);
-        frame2.setBounds(MAIN_FRAME_W + image1.getWidth(), 0, image1.getWidth(), image1.getHeight() + 35);
+        frame2.setBounds(MAIN_FRAME_W, image1.getHeight() + HEIGHT_INCREMENT, image1.getWidth(), image1.getHeight() + HEIGHT_INCREMENT);
         frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        MainFrame mainFrame = new MainFrame();
+        mainFrame = new MainFrame();
         mainFrame.setVisible(true);
         mainFrame.setBounds(0, 0, MAIN_FRAME_W, MAIN_FRAME_H);
+
+        filterFrame = new FilterFrame();
+        filterFrame.setVisible(true);
+        filterFrame.setBounds(MAIN_FRAME_W + image1.getWidth(), 0, FILTER_FRAME_W, FILTER_FRAME_H);
+        filterFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         this.image1 = image1;
         panel1.add(new JLabel(new ImageIcon(image1)));
         frame1.revalidate();
     }
 
+    public MainFrame getMainFrame(){
+        return mainFrame;
+    }
+    
     public void copyImage1() {
         this.image2 = ReadWriteUtil.copyImage(image1);
         updateImage2();
@@ -97,7 +115,7 @@ public class App {
     private void updateImage2() {
         panel2.removeAll();
         panel2.add(new JLabel(new ImageIcon(image2)));
-        frame2.setBounds(MAIN_FRAME_W + image1.getWidth(), 0, image2.getWidth(), image2.getHeight() + 35);
+        frame2.setBounds(MAIN_FRAME_W, image1.getHeight() + HEIGHT_INCREMENT, image2.getWidth(), image2.getHeight() + HEIGHT_INCREMENT);
         frame2.revalidate();
     }
 
@@ -113,10 +131,7 @@ public class App {
                 }
             }
             image2 = temp;
-            panel2.removeAll();
-            panel2.add(new JLabel(new ImageIcon(image2)));
-            frame2.setBounds(MAIN_FRAME_W + image1.getWidth(), 0, image2.getWidth(), image2.getHeight() + 35);
-            frame2.revalidate();
+            updateImage2();
         } catch (Exception ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -403,8 +418,9 @@ public class App {
             int w = 3 * image2.getWidth();
             int newH = h / sx;
             int newW = w / sy / 3 * 3;
-            if (newH == 0 || newW == 0)
+            if (newH == 0 || newW == 0) {
                 return;
+            }
             byte[] newImage = new byte[pixelArray.length];
             for (int i = 0; i < h; i = i + sx) {
                 for (int j = 0; j < w / sy / 3 * 3 * sy; j = j + 3 * sy) {

@@ -5,12 +5,9 @@
  */
 package main;
 
-import java.awt.color.ColorSpace;
-import java.awt.color.ICC_ColorSpace;
 import util.ReadWriteUtil;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
