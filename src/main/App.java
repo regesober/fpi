@@ -425,7 +425,6 @@ public class App {
                     newImage[(i / sx) * newW + j / sy + 2] = (byte) (ba / den);
                 }
             }
-            System.out.println(h / sx + " " + w / 3 * 3 * sy);
             updateImage2(newImage, newH, newW);
         } catch (NumberFormatException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
